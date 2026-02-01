@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Controle de Pagamentos | Bloco B1</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&family=Roboto+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="style.css">
+    
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e40af">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1 id="building-title">BLOCO B1</h1>
+                        <p class="subtitle">Controle de Pagamentos</p>
+                    </div>
+                </div>
+                
+                <div class="month-control">
+                    <button class="nav-btn" id="prev-month">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="month-display">
+                        <span id="current-month-year">JANEIRO 2024</span>
+                        <div class="due-date">
+                            <i class="far fa-calendar-alt"></i>
+                            Vencimento: Dia 10
+                        </div>
+                    </div>
+                    <button class="nav-btn" id="next-month">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <div class="header-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Arrecadado</span>
+                        <span class="stat-value" id="total-collected">0 KZ</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">A Receber</span>
+                        <span class="stat-value pending" id="total-pending">0 KZ</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Pagamentos</span>
+                        <span class="stat-value" id="payment-count">0/12</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Filtros -->
+        <div class="filter-section">
+            <div class="filter-tabs">
+                <button class="filter-btn active" data-filter="all">
+                    <i class="fas fa-list"></i>
+                    Todos os Apartamentos
+                </button>
+                <button class="filter-btn" data-filter="paid">
+                    <i class="fas fa-check-circle"></i>
+                    Pagos Confirmados
+                </button>
+                <button class="filter-btn" data-filter="pending">
+                    <i class="fas fa-clock"></i>
+                    Pendentes
+                </button>
+                <button class="filter-btn" data-filter="overdue">
+                    <i class="fas fa-exclamation-circle"></i>
+                    Em Atraso
+                </button>
+            </div>
+            
+            <div class="search-box">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Buscar apartamento ou responsável...">
+            </div>
+        </div>
+
+        <!-- Tabela de Dados -->
+        <div class="table-container">
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th class="col-apt">APTO</th>
+                            <th class="col-owner">RESPONSÁVEL</th>
+                            <th class="col-status">STATUS</th>
+                            <th class="col-date">DATA PAGAMENTO</th>
+                            <th class="col-value">VALOR</th>
+                            <th class="col-actions">AÇÕES</th>
+                        </tr>
+                    </thead>
+                    <tbody id="table-body">
+                        <!-- Dados serão carregados aqui -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Resumo Financeiro -->
+        <div class="summary-section">
+            <div class="summary-card">
+                <div class="summary-header">
+                    <i class="fas fa-chart-bar"></i>
+                    <h3>Resumo do Mês</h3>
+                </div>
+                <div class="summary-content">
+                    <div class="summary-item">
+                        <span>Total a Cobrar:</span>
+                        <span class="summary-value" id="total-to-collect">36.000 KZ</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Total Arrecadado:</span>
+                        <span class="summary-value success" id="summary-collected">0 KZ</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Saldo Pendente:</span>
+                        <span class="summary-value warning" id="summary-pending">36.000 KZ</span>
+                    </div>
+                    <div class="progress-container">
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="progress-fill"></div>
+                        </div>
+                        <div class="progress-text">
+                            <span id="progress-percent">0%</span>
+                            <span>concluído</span>
+                        </div>
+                    </div>
+                    <div class="base-value-info">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Valor base por apartamento: <strong id="base-value">3.000 KZ</strong></span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions-card">
+                <div class="actions-header">
+                    <i class="fas fa-cog"></i>
+                    <h3>Ações Rápidas</h3>
+                </div>
+                <div class="actions-content">
+                    <button class="action-btn" id="btn-export">
+                        <i class="fas fa-file-export"></i>
+                        Exportar Relatório
+                    </button>
+                    <button class="action-btn" id="btn-refresh">
+                        <i class="fas fa-sync-alt"></i>
+                        Atualizar Dados
+                    </button>
+                    <button class="action-btn" id="btn-print">
+                        <i class="fas fa-print"></i>
+                        Imprimir
+                    </button>
+                </div>
+                <div class="update-info">
+                    <i class="fas fa-info-circle"></i>
+                    <span>Última atualização: <span id="last-update">--:--</span></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Histórico e Relatórios -->
+        <div class="history-section">
+            <div class="history-card">
+                <div class="history-header">
+                    <i class="fas fa-chart-line"></i>
+                    <h3>Histórico e Relatórios</h3>
+                </div>
+                <div class="history-content" id="history-summary">
+                    <!-- Será preenchido pelo JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal de Detalhes -->
+        <div class="modal-overlay" id="modal-overlay">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3><i class="fas fa-home"></i> Detalhes do Apartamento</h3>
+                    <button class="modal-close" id="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="modal-content" id="modal-content">
+                        <!-- Conteúdo será carregado dinamicamente -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-secondary" id="modal-cancel">Fechar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <div class="footer-content">
+                <div class="footer-info">
+                    <p>Sistema de Controle Financeiro - Bloco B1</p>
+                    <p class="footer-note">Dados sincronizados automaticamente da planilha online</p>
+                </div>
+                <div class="footer-stats">
+                    <span class="footer-stat">
+                        <i class="fas fa-building"></i>
+                        Total de Unidades: <strong>12</strong>
+                    </span>
+                    <span class="footer-stat">
+                        <i class="fas fa-money-bill-wave"></i>
+                        Valor Base: <strong>3.000 KZ</strong>
+                    </span>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Carregando dados...</p>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="script.js"></script>
+    
+    <style>
+        /* Estilos adicionais inline para garantir funcionamento */
+        .base-value-info {
+            margin-top: 15px;
+            padding: 10px;
+            background: #f0f9ff;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #1e40af;
+        }
+        
+        .base-value-info i {
+            color: #3b82f6;
+        }
+        
+        .base-value-info strong {
+            font-weight: 700;
+            font-size: 15px;
+        }
+        
+        #connection-status {
+            position: fixed;
+            bottom: 70px;
+            right: 20px;
+            padding: 8px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 500;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .status-online {
+            background: rgba(5, 150, 105, 0.9);
+            color: white;
+        }
+        
+        .status-offline {
+            background: rgba(220, 38, 38, 0.9);
+            color: white;
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-overlay.active {
+            display: flex;
+        }
+        
+        .loading-spinner {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .loading-spinner i {
+            font-size: 40px;
+            color: #1e40af;
+            margin-bottom: 15px;
+        }
+        
+        .loading-spinner p {
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 16px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 10000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            animation: slideIn 0.3s ease;
+        }
+        
+        .building-badge {
+            font-size: 12px;
+            margin-left: 5px;
+            opacity: 0.8;
+        }
+        
+        .local-badge {
+            font-size: 10px;
+            margin-left: 4px;
+            opacity: 0.7;
+            cursor: help;
+        }
+        
+        .tooltip {
+            cursor: help;
+            margin-left: 5px;
+            color: #6b7280;
+        }
+        
+        .extra-badge {
+            background-color: #dbeafe;
+            color: #1d4ed8;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-left: 6px;
+        }
+        
+        @media print {
+            .app-header,
+            .filter-section,
+            .actions-card,
+            .history-section,
+            .app-footer,
+            .btn-action,
+            #connection-status {
+                display: none !important;
+            }
+            
+            .table-container {
+                overflow: visible !important;
+            }
+            
+            body {
+                background: white !important;
+                color: black !important;
+            }
+        }
+    </style>
+</body>
+</html>

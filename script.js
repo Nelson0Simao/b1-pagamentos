@@ -594,12 +594,16 @@ function safeSetText(id, text) {
 }
 
 function formatCurrency(value) {
-    return new Intl.NumberFormat('pt-AO', {
+    // Formatar como moeda AOA primeiro para ter a formatação correta
+    const currencyString = new Intl.NumberFormat('pt-AO', {
         style: 'currency',
         currency: 'AOA',
         minimumFractionDigits: 0,
         maximumFractionDigits: 0
     }).format(value);
+    
+    // Substituir "AOA" por "KZ" (e remover o símbolo de moeda se necessário)
+    return currencyString.replace('AOA', 'KZ');
 }
 
 function formatDate(date) {

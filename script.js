@@ -99,9 +99,86 @@ function loadFromCache() {
     return null;
 }
 
+// ===== ATUALIZAÇÃO FORÇADA =====
+async function forceRefreshData() {
+    console.log('Atualização forçada solicitada');
+    
+    // Apagar o cache do localStorage
+    try {
+        localStorage.removeItem(getCacheKey());
+        console.log('Cache do localStorage removido');
+    } catch (e) {
+        console.log('Erro ao limpar cache:', e);
+    }
+    
+    // Resetar cache na memória
+    appState.cache = { timestamp: 0, data: null };
+    
+    // Limpar dados existentes
+    appState.allData = {};
+    appState.apartments = [];
+    
+    // Mostrar estado de carregamento
+    showLoading(true);
+    appState.isLoading = true;
+    
+    try {
+        // Forçar busca dos dados mais recentes
+        console.log('Buscando dados atualizados da planilha...');
+        const csvData = await fetchPublishedSheet();
+        
+        if (csvData && csvData.trim()) {
+            console.log('Dados atualizados recebidos');
+            
+            // Salvar novo cache
+            saveToCache(csvData);
+            
+            // Processar novos dados
+            processAllData(csvData);
+            
+            appState.isOnline = true;
+            showNotification('Dados atualizados com sucesso!', 'success');
+            
+            // Garantir que a tabela é atualizada
+            updateCurrentMonthData();
+        } else {
+            console.log('Planilha vazia ou sem dados');
+            showNotification('Planilha vazia ou sem dados', 'warning');
+        }
+    } catch (error) {
+        console.error('Erro na atualização:', error);
+        
+        // Verificar se há cache antigo mesmo após limpeza
+        const cachedData = loadFromCache();
+        if (cachedData) {
+            console.log('Usando cache antigo após erro');
+            processAllData(cachedData);
+            showNotification('Erro ao atualizar. Dados podem estar desatualizados', 'error');
+        } else {
+            // Gerar dados padrão
+            generateEmptyMonth();
+            updateUI();
+            showNotification('Usando dados padrão. Verifique sua conexão', 'warning');
+        }
+        
+        appState.isOnline = false;
+    } finally {
+        appState.isLoading = false;
+        showLoading(false);
+        updateConnectionStatus();
+        updateSummary();
+    }
+}
+
 // ===== CARREGAR TODOS OS DADOS =====
-async function loadAllData() {
+async function loadAllData(forceRefresh = false) {
     if (appState.isLoading) return;
+    
+    // Se for uma atualização forçada, usar a nova função
+    if (forceRefresh) {
+        await forceRefreshData();
+        return;
+    }
     
     appState.isLoading = true;
     showLoading(true);
@@ -110,30 +187,30 @@ async function loadAllData() {
         // Verificar cache primeiro
         const cachedData = loadFromCache();
         if (cachedData) {
-            console.log('📦 Usando cache');
+            console.log('Usando cache');
             processAllData(cachedData);
             return;
         }
         
         // Carregar da planilha
-        console.log('🌐 Buscando dados online...');
+        console.log('Buscando dados online...');
         const csvData = await fetchPublishedSheet();
         
         if (csvData) {
             saveToCache(csvData);
             processAllData(csvData);
             appState.isOnline = true;
-            showNotification('✓ Dados atualizados', 'success');
+            showNotification('Dados atualizados', 'success');
         }
         
     } catch (error) {
-        console.error('❌ Erro:', error);
+        console.error('Erro:', error);
         
         const cachedData = loadFromCache();
         if (cachedData) {
-            console.log('⚠️ Usando cache expirado');
+            console.log('Usando cache expirado');
             processAllData(cachedData);
-            showNotification('⚠️ Dados podem estar desatualizados', 'warning');
+            showNotification('Dados podem estar desatualizados', 'warning');
         }
         
         appState.isOnline = false;
@@ -1008,9 +1085,13 @@ function setupEventListeners() {
     if (prevMonth) prevMonth.addEventListener('click', () => changeMonth('prev'));
     if (nextMonth) nextMonth.addEventListener('click', () => changeMonth('next'));
     
-    // Botões
+    // Botões - MODIFICADO PARA ATUALIZAÇÃO FORÇADA
     const btnRefresh = document.getElementById('btn-refresh');
-    if (btnRefresh) btnRefresh.addEventListener('click', () => loadAllData());
+    if (btnRefresh) {
+        btnRefresh.addEventListener('click', () => {
+            loadAllData(true); // true = força atualização
+        });
+    }
     
     const btnExport = document.getElementById('btn-export');
     if (btnExport) btnExport.addEventListener('click', exportReport);

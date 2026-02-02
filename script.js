@@ -964,7 +964,7 @@ function updateConnectionStatus() {
         statusElement.innerHTML = '<i class="fas fa-wifi"></i> Online';
         statusElement.className = 'status-online';
     } else {
-        statusElement.innerHTML = '<i class="fas fa-wifi-slash"></i> Offline';
+        statusElement.innerHTML = '<i class="fas fa-wifi-slash"></i> Sem Internet';
         statusElement.className = 'status-offline';
     }
 }

@@ -1,6 +1,6 @@
 {
   "name": "Controle de Pagamentos",
-  "short_name": "Pagamentos",
+  "short_name": "B1 Pagamentos",
   "description": "Controle de pagamentos B1",
   "lang": "pt-BR",
   "start_url": "/?source=pwa",

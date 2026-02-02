@@ -785,11 +785,13 @@ body {
     }
     
     .header-stats {
-        flex-direction: column;
+        display: flex;
         gap: 12px;
         min-width: auto;
+        justify-content: space-between;
+        align-items: center;
     }
-    
+
     .stat-item {
         text-align: left;
     }

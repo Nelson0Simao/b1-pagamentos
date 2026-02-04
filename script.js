@@ -6,7 +6,7 @@ const CONFIG = {
     CURRENCY: 'KZ',
     CACHE_DURATION: 5 * 60 * 1000,
     TOTAL_APARTMENTS: 12, // Apartamentos 1-11 + B1
-    APARTMENTS_LIST: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12'],
+    APARTMENTS_LIST: ['1', '2', '3', '4', '11', '12', '13', '14', '21', '22', '23', '24'],
     BUILDING_NAME: 'BLOCO B1',
     MONTH_NAMES: [
         'JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO',
